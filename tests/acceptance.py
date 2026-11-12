@@ -152,11 +152,32 @@ def main() -> int:
     check("locator:begin" in t1 and "添加文件到数据库" in t1 and "build_index.py" in t1,
           "set_triggers sync 生成口令契约块")
     tmp_agents.write_text("前面本来就有的话\n\n" + t1, encoding="utf-8")
-    sh([PY, str(TOOLS / "set_triggers.py"), "sync", "--path", str(tmp_agents)])
-    sh([PY, str(TOOLS / "set_triggers.py"), "sync", "--path", str(tmp_agents)])
+    ra = sh([PY, str(TOOLS / "set_triggers.py"), "sync", "--path", str(tmp_agents)])
+    rb = sh([PY, str(TOOLS / "set_triggers.py"), "sync", "--path", str(tmp_agents)])
     t2 = tmp_agents.read_text(encoding="utf-8")
     check("前面本来就有的话" in t2 and t2.count("locator:begin") == 1 and t2.count("locator:end") == 1,
           "重复 sync 幂等：不叠加、不动别的内容")
+    check(ra.returncode == 0 and rb.returncode == 0 and "bad escape" not in (ra.stderr + rb.stderr),
+          "重复 sync 不因路径里的反斜杠报错（re 替换说）")
+
+    # 3f. 换口令全流程（在技能副本上做，不动本仓库的 triggers.json）
+    import shutil as _shutil
+    copy = WS / "skillcopy"
+    if copy.exists():
+        _shutil.rmtree(copy, ignore_errors=True)
+    (copy / "tools").mkdir(parents=True, exist_ok=True)
+    _shutil.copy2(SKILL / "triggers.json", copy / "triggers.json")
+    _shutil.copy2(TOOLS / "set_triggers.py", copy / "tools" / "set_triggers.py")
+    agents2 = WS / "AGENTS-newuser.md"
+    if agents2.exists():
+        agents2.unlink()
+    r1 = sh([PY, str(copy / "tools" / "set_triggers.py"), "add", "喂资料", "--path", str(agents2)])
+    check(r1.returncode == 0 and "喂资料" in agents2.read_text(encoding="utf-8"),
+          "换导入口令：AGENTS.md 里立刻是新词")
+    r2 = sh([PY, str(copy / "tools" / "set_triggers.py"), "search", "找一下", "--path", str(agents2)])
+    t3 = agents2.read_text(encoding="utf-8")
+    check(r2.returncode == 0 and "找一下" in t3 and "喂资料" in t3 and t3.count("locator:begin") == 1,
+          "再换查询口令：两个新词在同一块里、没叠加")
 
     r = sh([PY, str(TOOLS / "locate.py"), "--outline", "--dir", str(LOC)])
     check("§2.3.1" in r.stdout and "§幻灯片1" in r.stdout, "outline 列出文档与幻灯片标号")

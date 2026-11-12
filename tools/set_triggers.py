@@ -92,7 +92,8 @@ def sync(scope: str, path: str | None, dry: bool = False) -> str:
         text = p.read_text(encoding="utf-8")
         pat = re.compile(r"<!-- locator:begin.*?<!-- locator:end -->\n?", re.S)
         if pat.search(text):
-            text = pat.sub(new, text)                 # 幂等替换，不叠加
+            # 用函数式替换：契约块里有 Windows 路径（\U \d 之类），当替换串会被 re 当成转义报错
+            text = pat.sub(lambda _m: new, text)
         else:
             text = text.rstrip("\n") + "\n\n" + new
     else:
