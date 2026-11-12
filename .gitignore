@@ -1,0 +1,26 @@
+# 两个真实文件清单只留本地，不进仓库
+tests/real_pdfs.txt
+tests/real_legacy.txt
+
+# 索引与中间产物
+.locator/
+**/.locator/
+tests/data/
+tests/pdf/
+tests/ws/
+tests/perf/
+tests/legacy/
+raw/
+*.tmp.*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+*.zip

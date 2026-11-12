@@ -1,0 +1,4 @@
+﻿# 本地真实 PDF 验收用例（每行一个路径，# 开头为注释）。文件不存在时对应那段自动跳过。
+# 复制成 real_pdfs.txt 再填自己的路径；real_pdfs.txt 已被 .gitignore 忽略。
+C:\path\to\a.pdf
+C:\path\to\b.pdf

@@ -1,0 +1,4 @@
+﻿# 本地真实老格式验收用例（.doc/.xls/.ppt，每行一个路径）。需要本机有 LibreOffice Kit。
+# 复制成 real_legacy.txt 再填自己的路径；real_legacy.txt 已被 .gitignore 忽略。
+C:\path\to\old.doc
+C:\path\to\old.xls
