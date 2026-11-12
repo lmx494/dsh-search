@@ -41,8 +41,32 @@ $L="$env:USERPROFILE\.dsh\skills\locator"; $P="python"   # 或你的 python.exe 
 | `locate.py "<词>" --section --all` | 长段不截断 |
 | `locate.py "<词>" --no-sync` | 查询前不校对源文件 |
 | `build_index.py remove <路径>` / `clear` | 移除某个 / 清空 |
+| `tools/set_triggers.py` | 看 / 改自然语言口令，并同步进 AGENTS.md |
 
 索引默认落在**当前目录**的 `.locator\`，用 `--dir` 换地方。
+
+## 口令（自然语言触发词，可以随便改）
+
+装了技能之后，你不用记命令行，直接用大白话触发。**现在的口令是这两句**：
+
+| 你说 | 它做什么 |
+|---|---|
+| `添加文件到数据库 <文件或目录>`（也认 `添加到数据库`） | 导入到库 |
+| `搜索<一串字符>`（例：`搜索四象限整流`） | 按字面查库，回「文件 · 序号 · 该序号整段原文」 |
+
+口令存在技能根目录的 **`triggers.json`** 里，改口令是第一条命令的事：
+
+```powershell
+$L="$env:USERPROFILE\.dsh\skills\locator"; $P="python"
+
+& $P "$L\tools\set_triggers.py" show                  # 看当前口令
+& $P "$L\tools\set_triggers.py" add "喂资料" "入库"    # 改导入口令（可给多个）
+& $P "$L\tools\set_triggers.py" search "找" "查一下"   # 改查询口令（可给多个）
+```
+
+改完它会自动把一段**契约块**写进 `AGENTS.md`（默认当前工作目录那份；`--scope global` 写 `$DSH_HOME\AGENTS.md`，所有工作区都认）。契约块用 `<!-- locator:begin -->` / `<!-- locator:end -->` 包着，**重复运行是幂等替换，不会叠加、也不会动你 AGENTS.md 里别的内容**；想自己手写这段契约，直接改两个标记之间的文字也行。
+
+> 模型是靠 AGENTS.md 里那段契约认口令的。**改了 `triggers.json` 不同步，模型就不认新口令**——`add` / `search` 子命令默认会自动同步，只改配置加 `--no-sync`。
 
 ## 支持格式
 

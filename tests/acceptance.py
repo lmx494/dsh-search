@@ -140,6 +140,24 @@ def main() -> int:
     r = sh([PY, str(TOOLS / "locate.py"), "同步后的内容", "--no-sync", "--dir", str(LOC)])
     check("〔命中" in r.stdout, "--no-sync 仍能正常查询")
 
+    # 3e. 口令可塑性：口令写在 triggers.json，set_triggers.py 把它同步成 AGENTS.md 里的契约块
+    tcfg = json.loads((SKILL / "triggers.json").read_text(encoding="utf-8"))
+    check("添加文件到数据库" in tcfg.get("add", []) and "搜索" in tcfg.get("search", []),
+          "triggers.json 里存着当前口令")
+    tmp_agents = WS / "AGENTS-test.md"
+    if tmp_agents.exists():
+        tmp_agents.unlink()
+    r = sh([PY, str(TOOLS / "set_triggers.py"), "sync", "--path", str(tmp_agents)])
+    t1 = tmp_agents.read_text(encoding="utf-8") if tmp_agents.exists() else ""
+    check("locator:begin" in t1 and "添加文件到数据库" in t1 and "build_index.py" in t1,
+          "set_triggers sync 生成口令契约块")
+    tmp_agents.write_text("前面本来就有的话\n\n" + t1, encoding="utf-8")
+    sh([PY, str(TOOLS / "set_triggers.py"), "sync", "--path", str(tmp_agents)])
+    sh([PY, str(TOOLS / "set_triggers.py"), "sync", "--path", str(tmp_agents)])
+    t2 = tmp_agents.read_text(encoding="utf-8")
+    check("前面本来就有的话" in t2 and t2.count("locator:begin") == 1 and t2.count("locator:end") == 1,
+          "重复 sync 幂等：不叠加、不动别的内容")
+
     r = sh([PY, str(TOOLS / "locate.py"), "--outline", "--dir", str(LOC)])
     check("§2.3.1" in r.stdout and "§幻灯片1" in r.stdout, "outline 列出文档与幻灯片标号")
 
