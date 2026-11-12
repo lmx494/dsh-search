@@ -12,7 +12,7 @@
 它是 DSH（DeepSeek Harness）技能，装到技能目录即可用（`skill` 目录下每个 `<名字>/SKILL.md` 是一个技能）：
 
 ```powershell
-git clone <你的仓库地址> "$env:USERPROFILE\.dsh\skills\locator"
+git clone https://github.com/lmx494/dsh-search.git "$env:USERPROFILE\.dsh\skills\locator"
 ```
 
 已有文件也可以直接跑 `pwsh -File install.ps1`。
